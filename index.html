@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía visual — Analítica de datos del gimnasio</title>
+<style>
+:root{
+  --bg:#0f1420; --card:#171e2e; --card2:#1d2639; --text:#e8ecf5; --muted:#9aa6bf;
+  --accent:#ff6b35; --accent2:#2ec4b6; --warn:#ffbe0b; --bad:#ef476f; --ok:#06d6a0; --line:#2a3550;
+  --radius:16px;
+}
+body.light{
+  --bg:#f4f6fb; --card:#ffffff; --card2:#eef1f8; --text:#1b2236; --muted:#5b6784; --line:#d9e0ef;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;transition:background .3s,color .3s}
+#progress{position:fixed;top:0;left:0;height:4px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));z-index:100}
+nav{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:6px;padding:10px 16px;overflow-x:auto}
+nav a{color:var(--muted);text-decoration:none;font-size:.85rem;padding:6px 12px;border-radius:999px;white-space:nowrap;transition:.2s}
+nav a:hover{color:var(--text);background:var(--card2)}
+nav a.active{background:var(--accent);color:#fff}
+nav .spacer{flex:1}
+#themeBtn{background:var(--card2);border:1px solid var(--line);color:var(--text);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:.85rem}
+header.hero{padding:70px 20px 50px;text-align:center;background:radial-gradient(circle at 20% 0,rgba(255,107,53,.18),transparent 50%),radial-gradient(circle at 80% 20%,rgba(46,196,182,.18),transparent 50%)}
+.hero .tag{display:inline-block;background:var(--card2);border:1px solid var(--line);padding:4px 14px;border-radius:999px;font-size:.8rem;color:var(--muted);margin-bottom:18px}
+.hero h1{font-size:clamp(2rem,5vw,3.4rem);line-height:1.15;margin-bottom:14px}
+.hero h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:640px;margin:0 auto;color:var(--muted);font-size:1.1rem}
+.stats{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:30px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 22px;min-width:140px}
+.stat b{display:block;font-size:1.6rem}
+.stat small{color:var(--muted)}
+main{max-width:1000px;margin:0 auto;padding:0 20px 80px}
+section{padding:50px 0 10px}
+.num{display:inline-flex;width:34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;align-items:center;justify-content:center;font-weight:700;margin-right:10px;font-size:1rem}
+h2{font-size:1.6rem;margin-bottom:18px;display:flex;align-items:center}
+h3{font-size:1.1rem;margin:18px 0 8px}
+p{margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin-bottom:16px}
+.callout{border-left:4px solid var(--accent2);background:var(--card2);padding:14px 18px;border-radius:0 var(--radius) var(--radius) 0;margin:14px 0}
+.callout.q{border-color:var(--accent)}
+.callout.warn{border-color:var(--warn)}
+.callout b.t{display:block;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.big-q{font-size:1.35rem;font-weight:600;text-align:center;padding:26px;background:linear-gradient(135deg,rgba(255,107,53,.15),rgba(46,196,182,.15));border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.mini{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px;transition:.2s}
+.mini:hover{transform:translateY(-3px);border-color:var(--accent)}
+.mini .ic{font-size:1.8rem}
+.mini b{display:block;margin:4px 0}
+.mini span{color:var(--muted);font-size:.9rem}
+code{background:var(--card2);padding:2px 7px;border-radius:6px;font-family:Consolas,monospace;font-size:.9em;color:var(--accent2)}
+pre{background:#0a0e17;color:#d6e2ff;padding:16px;border-radius:12px;overflow-x:auto;font-size:.88rem;margin:10px 0}
+pre .k{color:#ff9e64}pre .s{color:#9ece6a}pre .c{color:#6b7794}
+/* ERD */
+.erd{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:10px 0}
+.tbl{background:var(--card2);border:2px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;transition:.25s;text-align:center}
+.tbl:hover,.tbl.on{border-color:var(--accent);transform:scale(1.03)}
+.tbl.rel{border-color:var(--accent2);box-shadow:0 0 0 3px rgba(46,196,182,.25)}
+.tbl b{display:block}
+.tbl small{color:var(--muted)}
+#erdInfo{min-height:56px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chip{background:var(--card2);border:1px solid var(--line);padding:6px 14px;border-radius:999px;font-size:.85rem;cursor:pointer;color:var(--text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+/* tables */
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.92rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+/* tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{background:var(--card2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:10px;cursor:pointer;font-size:.9rem}
+.tab.on{background:var(--accent2);color:#06201d;border-color:var(--accent2);font-weight:600}
+.pane{display:none}.pane.on{display:block;animation:fade .35s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+/* cleaning cards */
+.clean{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.clean .card{margin:0}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--ok);color:#042;margin-bottom:8px}
+/* groupby demo */
+.demo{display:grid;gap:14px;grid-template-columns:1fr 1fr}
+@media(max-width:700px){.demo{grid-template-columns:1fr}}
+.btn{background:var(--accent);color:#fff;border:0;padding:10px 20px;border-radius:10px;cursor:pointer;font-weight:600;font-size:.95rem;transition:.2s}
+.btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.btn.sec{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+.row-anim{animation:pop .4s}
+@keyframes pop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+/* charts */
+.bars{display:flex;align-items:flex-end;gap:14px;height:240px;padding:10px 6px 0;border-bottom:2px solid var(--line);position:relative}
+.bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.bar i{display:block;width:100%;max-width:90px;border-radius:8px 8px 0 0;height:0;transition:height 1.1s cubic-bezier(.2,.8,.2,1);position:relative}
+.bar i:hover{filter:brightness(1.2)}
+.labels{display:flex;gap:14px;padding:8px 6px 0}
+.labels span{flex:1;text-align:center;font-size:.78rem;color:var(--muted)}
+.donut-wrap{display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:center}
+.donut{width:210px;height:210px;border-radius:50%;position:relative;transition:background .6s}
+.donut::after{content:"";position:absolute;inset:34px;background:var(--card);border-radius:50%}
+.donut-c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center}
+.donut-c b{font-size:1.2rem}.donut-c small{color:var(--muted)}
+.legend{display:flex;flex-direction:column;gap:12px}
+.legend div{display:flex;align-items:center;gap:12px;background:var(--card2);padding:10px 16px;border-radius:12px;border:1px solid var(--line)}
+.legend .dot{width:14px;height:14px;border-radius:50%}
+.legend b{display:block;font-size:1.15rem}
+.legend small{color:var(--muted)}
+.note{font-size:.8rem;color:var(--muted);font-style:italic}
+/* accordion */
+.acc{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;background:var(--card)}
+.acc button{width:100%;text-align:left;background:none;border:0;color:var(--text);padding:16px 18px;font-size:1rem;cursor:pointer;display:flex;justify-content:space-between;gap:10px;font-weight:600}
+.acc button em{font-style:normal;color:var(--accent);transition:.3s}
+.acc.open button em{transform:rotate(45deg)}
+.acc .ans{max-height:0;overflow:hidden;transition:max-height .35s;padding:0 18px;color:var(--muted)}
+.acc.open .ans{max-height:300px;padding-bottom:16px}
+.acc .ans b{color:var(--text)}
+/* flip cards */
+.flips{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.flip{perspective:800px;height:150px;cursor:pointer}
+.flip>div{position:relative;width:100%;height:100%;transition:transform .55s;transform-style:preserve-3d}
+.flip.on>div{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;border:1px solid var(--line)}
+.flip .f{background:var(--card);font-weight:700;font-size:1.05rem}
+.flip .f small{display:block;color:var(--muted);font-weight:400;font-size:.75rem;margin-top:6px}
+.flip .b{background:linear-gradient(135deg,var(--accent),#c2410c);color:#fff;transform:rotateY(180deg);font-size:.88rem}
+/* quiz */
+.opt{display:block;width:100%;text-align:left;background:var(--card2);border:2px solid var(--line);color:var(--text);padding:12px 16px;border-radius:12px;margin:8px 0;cursor:pointer;font-size:.95rem;transition:.2s}
+.opt:hover:not(:disabled){border-color:var(--accent2)}
+.opt.good{border-color:var(--ok);background:rgba(6,214,160,.15)}
+.opt.bad{border-color:var(--bad);background:rgba(239,71,111,.15)}
+.checklist label{display:flex;gap:10px;align-items:center;padding:8px 0;cursor:pointer;border-bottom:1px solid var(--line)}
+.checklist input{accent-color:var(--accent);width:18px;height:18px}
+.checklist input:checked+span{text-decoration:line-through;color:var(--muted)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.compare{grid-template-columns:1fr}}
+.compare .card{margin:0;text-align:center}
+.compare .card b{font-size:1.4rem;display:block}
+footer{text-align:center;color:var(--muted);padding:30px;border-top:1px solid var(--line);font-size:.9rem}
+.reveal{opacity:0;transform:translateY(24px);transition:.7s}
+.reveal.in{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<nav id="nav">
+  <a href="#s1">Proyecto</a><a href="#s2">Pregunta</a><a href="#s3">Modelo</a><a href="#s4">Diccionario</a>
+  <a href="#s5">Herramientas</a><a href="#s6">Datos</a><a href="#s7">Limpieza</a><a href="#s8">Análisis</a>
+  <a href="#s9">Gráficas</a><a href="#s10">Conclusión</a><a href="#s11">Práctica</a><a href="#s12">Repaso</a>
+  <span class="spacer"></span><button id="themeBtn">☀️ / 🌙</button>
+</nav>
+
+<header class="hero">
+  <span class="tag">📊 Guía para exponer · Python · Pandas · Matplotlib</span>
+  <h1>Analítica de datos <span>del gimnasio</span></h1>
+  <p>Entender qué hicimos, para qué lo hicimos y qué encontramos. No hace falta memorizar el código.</p>
+  <div class="stats">
+    <div class="stat"><b data-count="6">0</b><small>tablas</small></div>
+    <div class="stat"><b data-count="300">0</b><small>pagos analizados</small></div>
+    <div class="stat"><b>$583,400</b><small>pagados</small></div>
+    <div class="stat"><b>$23,800</b><small>pendientes</small></div>
+  </div>
+</header>
+
+<main>
+
+<!-- 1 -->
+<section id="s1" class="reveal">
+  <h2><span class="num">1</span>¿De qué trata nuestro proyecto?</h2>
+  <div class="card">
+    <p>Analizamos la <b>base de datos de un gimnasio</b> usando Python. Contiene información de <b>clientes, membresías, pagos, sesiones, entrenadores y clases</b>.</p>
+    <p>Buscamos aprovechar esa información para responder una pregunta relacionada con los <b>ingresos</b> del gimnasio.</p>
+  </div>
+  <div class="callout q"><b class="t">Si el maestro pregunta: ¿Para qué sirve este proyecto?</b>
+    Sirve para convertir los datos registrados del gimnasio en información que podamos entender y usar para tomar decisiones. Por ejemplo, saber qué membresías generan más dinero y qué pagos siguen pendientes.</div>
+</section>
+
+<!-- 2 -->
+<section id="s2" class="reveal">
+  <h2><span class="num">2</span>¿Cuál es nuestra pregunta analítica?</h2>
+  <div class="big-q">¿Qué conceptos de pago generan mayores ingresos cobrados y cuánto dinero permanece pendiente de pago?</div>
+  <div class="grid">
+    <div class="mini"><div class="ic">💰</div><b>Qué membresías generan más dinero</b><span>De dónde viene la mayor parte del dinero que recibe el gimnasio.</span></div>
+    <div class="mini"><div class="ic">⏳</div><b>Cuánto falta por cobrar</b><span>Dinero de pagos que siguen pendientes.</span></div>
+    <div class="mini"><div class="ic">🔍</div><b>Cómo lo respondimos</b><span>Revisamos conceptos de pago, cantidades y estado: pagado, pendiente o cancelado.</span></div>
+  </div>
+  <div class="callout"><b class="t">Para qué sirve</b>Comparar ingresos y detectar en qué membresías hay pagos pendientes.</div>
+</section>
+
+<!-- 3 -->
+<section id="s3" class="reveal">
+  <h2><span class="num">3</span>¿Cómo funciona nuestro modelo relacional?</h2>
+  <p>Seis tablas conectadas mediante identificadores. <b>Toca una tabla</b> para ver qué guarda y con cuáles se relaciona.</p>
+  <div class="erd" id="erd"></div>
+  <div class="callout" id="erdInfo">👆 Selecciona una tabla.</div>
+
+  <div class="tabs" data-tabs>
+    <button class="tab on" data-t="pk">Clave primaria (PK)</button>
+    <button class="tab" data-t="fk">Clave foránea (FK)</button>
+    <button class="tab" data-t="n">Relación 1:N</button>
+  </div>
+  <div class="card">
+    <div class="pane on" id="pk"><b>Identificador único.</b> Por ejemplo, el número de cliente. Piensa en la <b>matrícula</b> de un estudiante: identifica a una sola persona.</div>
+    <div class="pane" id="fk"><b>Conecta una tabla con otra</b> usando ese identificador. La matrícula permite relacionar al estudiante con sus materias y calificaciones.</div>
+    <div class="pane" id="n"><b>Uno a muchos.</b> Un cliente puede tener varios pagos registrados, pero cada pago pertenece a un solo cliente.
+      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <span class="chip on">👤 1 Cliente</span> →
+        <span class="chip">💳 Pago</span><span class="chip">💳 Pago</span><span class="chip">💳 Pago</span>
+      </div></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4" class="reveal">
+  <h2><span class="num">4</span>¿Qué es el diccionario de datos?</h2>
+  <p>Es la <b>descripción de los campos</b> de cada tabla. Nos ayuda a comprender qué información tenemos y para qué sirve cada campo. Ejemplo con la tabla <code>PAGOS</code>:</p>
+  <div class="card">
+    <table>
+      <tr><th>Campo</th><th>Qué significa</th></tr>
+      <tr><td><code>Folio_pago</code></td><td>Identifica cada pago</td></tr>
+      <tr><td><code>Monto</code></td><td>Cantidad de dinero</td></tr>
+      <tr><td><code>Concepto_pago</code></td><td>Qué se está pagando</td></tr>
+      <tr><td><code>Estado_pago</code></td><td>Pagado, pendiente o cancelado</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5" class="reveal">
+  <h2><span class="num">5</span>¿Qué herramientas utilizamos?</h2>
+  <div class="grid">
+    <div class="mini"><div class="ic">🐍</div><b>Python</b><span>Realizar el análisis mediante código.</span></div>
+    <div class="mini"><div class="ic">🐼</div><b>Pandas</b><span>Leer, organizar, revisar y calcular los datos.</span></div>
+    <div class="mini"><div class="ic">📈</div><b>Matplotlib</b><span>Crear las gráficas con los resultados.</span></div>
+    <div class="mini"><div class="ic">📓</div><b>Jupyter Notebook</b><span>Ejecutar el código por partes y ver los resultados.</span></div>
+  </div>
+  <div class="callout q"><b class="t">Si preguntan: ¿por qué Pandas?</b>Porque facilita trabajar con información de Excel, seleccionar columnas, encontrar datos faltantes y hacer operaciones sin revisar cada registro manualmente.</div>
+</section>
+
+<!-- 6 -->
+<section id="s6" class="reveal">
+  <h2><span class="num">6</span>¿Cómo importamos los datos?</h2>
+  <p>Con Pandas leímos el archivo Excel con las seis tablas y mostramos los primeros diez registros y las dimensiones de cada una.</p>
+<pre><span class="k">import</span> pandas <span class="k">as</span> pd
+df = pd.read_excel(<span class="s">"gimnasio.xlsx"</span>, sheet_name=<span class="k">None</span>)
+pagos.head(<span class="s">10</span>)   <span class="c"># primeros 10 registros</span>
+pagos.shape    <span class="c"># (300, 9) → filas, columnas</span></pre>
+  <div class="callout"><b class="t">¿Qué es la dimensión?</b>Cuántas filas y columnas tiene. PAGOS: 300 filas y 9 columnas = 300 registros y nueve campos.</div>
+  <div class="card" id="recBars"></div>
+</section>
+
+<!-- 7 -->
+<section id="s7" class="reveal">
+  <h2><span class="num">7</span>¿Qué hicimos con la limpieza de datos?</h2>
+  <p>Antes de analizar revisamos que la información estuviera en buenas condiciones. Tres revisiones:</p>
+  <div class="clean">
+    <div class="card"><span class="badge">1 · AUSENTES</span><h3>Datos ausentes</h3><p>Espacios donde falta información. Hubo datos incompletos en membresías y una columna vacía en pagos, pero <b>los campos que necesitábamos estaban completos</b>.</p></div>
+    <div class="card"><span class="badge">2 · DUPLICADOS</span><h3>Datos duplicados</h3><p>Registros repetidos que alterarían resultados. Revisamos los folios de pago: <b>no hay duplicados</b>.</p></div>
+    <div class="card"><span class="badge">3 · ATÍPICOS</span><h3>Valores atípicos</h3><p>Cantidades muy alejadas del resto. Si las membresías cuestan entre $150 y $6,000, uno de $100,000 merecería revisarse. <b>No se detectaron.</b></p></div>
+  </div>
+  <div class="callout q"><b class="t">¿Por qué limpiar?</b>Porque con datos incompletos o incorrectos obtendríamos resultados que no representan lo que realmente pasa.</div>
+  <div class="card">
+    <b>Mini ejemplo de valores atípicos:</b> mueve el control y mira si un monto se aleja del resto.
+    <input type="range" id="outRange" min="150" max="100000" value="2500" step="50" style="width:100%;margin:12px 0;accent-color:var(--accent)">
+    <div id="outRes" class="callout"></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section id="s8" class="reveal">
+  <h2><span class="num">8</span>¿Cómo analizamos los pagos?</h2>
+  <p>Usamos tres campos de la tabla PAGOS: <code>Concepto de pago</code>, <code>Estado del pago</code> y <code>Monto</code>. Después agrupamos los registros para sumar.</p>
+  <div class="callout"><b class="t">¿Qué es agrupar?</b>Juntar registros que tienen algo en común. Si hay muchos pagos de planes anuales, se agrupan y se suman para saber cuánto se cobró por ese concepto.</div>
+<pre>pagos.groupby(<span class="s">"Concepto_pago"</span>)[<span class="s">"Monto"</span>].sum()
+<span class="c"># groupby() → agrupa la información</span>
+<span class="c"># sum()     → suma las cantidades de cada grupo</span></pre>
+  <div class="card">
+    <b>🧪 Demo interactiva (datos de ejemplo, no son los reales)</b>
+    <div class="demo" style="margin-top:12px">
+      <div><small class="note">Pagos sueltos</small><table id="rawT"></table></div>
+      <div><small class="note">Resultado de groupby + sum</small><table id="grpT"><tr><td class="note">Presiona "Agrupar y sumar"</td></tr></table></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn" id="grpBtn">▶ Agrupar y sumar</button>
+      <button class="btn sec" id="rstBtn">Reiniciar</button>
+    </div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="s9" class="reveal">
+  <h2><span class="num">9</span>¿Qué nos dicen las gráficas?</h2>
+  <p>Esta es la parte más importante: <b>aquí respondemos la pregunta</b>.</p>
+
+  <div class="tabs" data-tabs>
+    <button class="tab on" data-t="g1">1 · Cobrado por concepto</button>
+    <button class="tab" data-t="g2">2 · Estado de pagos</button>
+    <button class="tab" data-t="g3">3 · Pendiente por concepto</button>
+  </div>
+
+  <div class="card">
+    <div class="pane on" id="g1">
+      <h3>Gráfica 1. Dinero cobrado por concepto</h3>
+      <div class="bars" data-bars="100,72,48,30,8" data-colors="#ff6b35,#ff8c42,#2ec4b6,#4cc9f0,#9aa6bf"></div>
+      <div class="labels"><span>Plan anual</span><span>Plan semestral</span><span>Mensualidad</span><span>Inscripción y mensualidad</span><span>Pago de un día</span></div>
+      <p class="note" style="margin-top:8px">Escala de referencia del eje: de $0 a $360,000. Las alturas son aproximadas; confirma las cifras exactas en tu notebook.</p>
+      <div class="callout"><b class="t">Cómo explicarla</b>Comparamos el dinero ya cobrado por cada servicio. Las membresías <b>anuales</b> generan la cantidad más alta, seguidas de las <b>semestrales</b>.</div>
+    </div>
+    <div class="pane" id="g2">
+      <h3>Gráfica 2. Estado de los pagos</h3>
+      <div class="donut-wrap">
+        <div style="position:relative"><div class="donut" id="donut"></div>
+          <div class="donut-c"><b>$618,000</b><small>total registrado</small></div></div>
+        <div class="legend">
+          <div><span class="dot" style="background:var(--ok)"></span><span><b>$583,400</b><small>Pagados</small></span></div>
+          <div><span class="dot" style="background:var(--warn)"></span><span><b>$23,800</b><small>Pendientes</small></span></div>
+          <div><span class="dot" style="background:var(--bad)"></span><span><b>$11,800</b><small>Cancelados</small></span></div>
+        </div>
+      </div>
+      <div class="callout"><b class="t">Cómo explicarla</b>La mayor parte del dinero corresponde a pagos realizados. También hay cantidades pendientes y canceladas; <b>las canceladas no se consideran dinero cobrado</b>.</div>
+    </div>
+    <div class="pane" id="g3">
+      <h3>Gráfica 3. Dinero pendiente por concepto</h3>
+      <div class="bars" data-bars="100,62,28,6" data-colors="#ffbe0b,#ffd166,#ff9f1c,#9aa6bf"></div>
+      <div class="labels"><span>Plan anual</span><span>Plan semestral</span><span>Mensualidad</span><span>Pago de un día</span></div>
+      <p class="note" style="margin-top:8px">Escala de referencia del eje: de $0 a $14,000. Las alturas son aproximadas.</p>
+      <div class="callout"><b class="t">Cómo explicarla</b>Muestra en qué servicios se concentra el dinero que falta por pagar. Los planes <b>anuales y semestrales</b> reúnen la mayor cantidad pendiente.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="s10" class="reveal">
+  <h2><span class="num">10</span>¿Qué concluimos?</h2>
+  <div class="card">
+    <p>✅ Identificamos qué conceptos generan mayores <b>ingresos cobrados</b> y cuáles tienen <b>pagos pendientes</b>.</p>
+    <p>✅ Las membresías <b>anuales y semestrales</b> aportan la mayor parte del dinero registrado.</p>
+    <p>✅ Existen <b>$23,800 pendientes</b>, así que conviene dar seguimiento a esos pagos.</p>
+    <p>✅ Usamos información que el gimnasio ya tenía para obtener resultados que ayudan a mejorar su administración.</p>
+  </div>
+</section>
+
+<!-- 11 -->
+<section id="s11" class="reveal">
+  <h2><span class="num">11</span>Posibles preguntas del maestro</h2>
+  <p>Intenta responder primero por tu cuenta y después abre la respuesta.</p>
+  <div id="qa"></div>
+
+  <div class="callout warn"><b class="t">⚠️ Punto clave: ingresos ≠ ganancias</b>
+    <div class="compare" style="margin-top:10px">
+      <div class="card"><small>INGRESOS</small><b>$583,400</b><small>Dinero que entró por pagos realizados</small></div>
+      <div class="card"><small>GANANCIAS</small><b>Ingresos − gastos</b><small>Nómina, renta, luz, mantenimiento…</small></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🎯 Mini quiz</h3>
+    <div id="quiz"></div>
+  </div>
+</section>
+
+<!-- 12 -->
+<section id="s12" class="reveal">
+  <h2><span class="num">12</span>Repaso rápido: 12 conceptos</h2>
+  <p>Toca cada tarjeta para ver su significado.</p>
+  <div class="flips" id="flips"></div>
+  <div style="margin-top:12px"><button class="btn sec" id="showAll">Mostrar todos / ocultar todos</button></div>
+
+  <div class="card" style="margin-top:20px">
+    <h3>✅ Checklist antes de entrar a exponer</h3>
+    <div class="checklist" id="check"></div>
+    <p class="note" style="margin-top:10px" id="checkMsg"></p>
+  </div>
+  <div class="callout"><b class="t">Recomendación para Roberto</b>Practica la pregunta analítica, las tres gráficas y la diferencia entre ingresos y ganancias. Si no recuerdas una línea de código, explica primero <b>qué función cumple</b>: entender el procedimiento vale más que repetir el código de memoria.</div>
+</section>
+
+</main>
+<footer>Guía de estudio · Analítica de datos del gimnasio · ¡Mucho éxito en tu exposición! 💪</footer>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+
+/* tema */
+$('#themeBtn').onclick=()=>document.body.classList.toggle('light');
+
+/* progreso + scrollspy */
+const secs=$$('main section'), links=$$('#nav a');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  $('#progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  let cur=secs[0].id;
+  secs.forEach(s=>{if(s.getBoundingClientRect().top<150)cur=s.id});
+  links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+cur));
+});
+
+/* reveal + animaciones al entrar */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting){e.target.classList.add('in');animateBars(e.target)}
+}),{threshold:.1});
+$$('.reveal').forEach(el=>io.observe(el));
+
+/* contadores del hero */
+$$('[data-count]').forEach(el=>{
+  const t=+el.dataset.count;let n=0;
+  const id=setInterval(()=>{n+=Math.ceil(t/40);if(n>=t){n=t;clearInterval(id)}el.textContent=n},30);
+});
+
+/* tabs */
+$$('[data-tabs]').forEach(g=>{
+  const card=g.nextElementSibling;
+  g.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{
+    g.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    card.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id===b.dataset.t));
+    animateBars(card,true);
+  });
+});
+
+/* barras */
+function animateBars(root,force){
+  root.querySelectorAll('.bars').forEach(b=>{
+    if(b.offsetParent===null)return;
+    const vals=b.dataset.bars.split(','),cols=b.dataset.colors.split(',');
+    if(!b.children.length){
+      vals.forEach((v,i)=>{const w=document.createElement('div');w.className='bar';
+        w.innerHTML='<i style="background:'+cols[i]+'"></i>';b.appendChild(w)});
+    }
+    [...b.querySelectorAll('i')].forEach((el,i)=>{
+      if(force)el.style.height='0';
+      setTimeout(()=>el.style.height=vals[i]*0.9+'%',force?60:100+i*120);
+    });
+  });
+  if(root.querySelector&&root.querySelector('#donut')&&root.querySelector('#g2.on'))drawDonut();
+}
+function drawDonut(){
+  const p=583400,e=23800,c=11800,t=p+e+c;
+  const a=p/t*100,b=a+e/t*100;
+  $('#donut').style.background=`conic-gradient(var(--ok) 0 ${a}%,var(--warn) ${a}% ${b}%,var(--bad) ${b}% 100%)`;
+}
+document.addEventListener('click',e=>{if(e.target.dataset&&e.target.dataset.t==='g2')setTimeout(drawDonut,50)});
+
+/* ERD */
+const tablas={
+ Clientes:{i:'👤',d:'Datos de las personas inscritas.',r:['Membresías','Pagos','Sesiones']},
+ Membresías:{i:'🎫',d:'Planes que contratan los clientes.',r:['Clientes','Pagos']},
+ Pagos:{i:'💳',d:'Movimientos de dinero (folio, monto, concepto, estado).',r:['Clientes','Membresías']},
+ Sesiones:{i:'🏃',d:'Actividades de los clientes.',r:['Clientes','Clase','Entrenadores']},
+ Entrenadores:{i:'🧑‍🏫',d:'Información del personal.',r:['Clase','Sesiones']},
+ Clase:{i:'🗓️',d:'Clases y sus horarios.',r:['Entrenadores','Sesiones']}
+};
+const erd=$('#erd');
+Object.entries(tablas).forEach(([n,t])=>{
+  const d=document.createElement('div');d.className='tbl';d.dataset.n=n;
+  d.innerHTML=`<span style="font-size:1.6rem">${t.i}</span><b>${n}</b><small>tabla</small>`;
+  d.onclick=()=>{
+    $$('.tbl').forEach(x=>x.classList.remove('on','rel'));d.classList.add('on');
+    t.r.forEach(r=>$$('.tbl').find(x=>x.dataset.n===r).classList.add('rel'));
+    $('#erdInfo').innerHTML=`<b>${n}:</b> ${t.d}<br>Se relaciona con: <b>${t.r.join(', ')}</b>.`;
+  };
+  erd.appendChild(d);
+});
+
+/* registros */
+const regs=[['Clientes',100],['Membresías',100],['Sesiones',100],['Pagos',300],['Entrenadores',9],['Clase',5]];
+$('#recBars').innerHTML='<b>Registros por tabla</b>'+regs.map(([n,v])=>
+ `<div style="display:flex;align-items:center;gap:10px;margin-top:8px"><span style="width:100px;font-size:.88rem">${n}</span>
+  <div style="flex:1;background:var(--card2);border-radius:8px;overflow:hidden"><div class="rb" data-w="${v/300*100}" style="height:20px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width 1s"></div></div>
+  <b style="width:36px;text-align:right">${v}</b></div>`).join('');
+new IntersectionObserver((es,o)=>es.forEach(e=>{if(e.isIntersecting){$$('.rb').forEach(r=>r.style.width=r.dataset.w+'%');o.disconnect()}}),{threshold:.3}).observe($('#recBars'));
+
+/* atípicos */
+function outCheck(){
+  const v=+$('#outRange').value;
+  const ok=v<=6000;
+  $('#outRes').className='callout'+(ok?'':' warn');
+  $('#outRes').innerHTML=`Monto: <b>$${v.toLocaleString()}</b> — `+(ok?'dentro del rango normal ($150 a $6,000).':'⚠️ muy alejado del resto: merecería revisarse.');
+}
+$('#outRange').oninput=outCheck;outCheck();
+
+/* groupby demo */
+const raw=[['Plan anual',12000],['Mensualidad',600],['Plan anual',12000],['Plan semestral',6500],['Mensualidad',600],['Plan semestral',6500],['Plan anual',12000]];
+function drawRaw(){
+  $('#rawT').innerHTML='<tr><th>Concepto</th><th>Monto</th></tr>'+raw.map(r=>`<tr class="row-anim"><td>${r[0]}</td><td>$${r[1].toLocaleString()}</td></tr>`).join('');
+}
+drawRaw();
+$('#grpBtn').onclick=()=>{
+  const g={};raw.forEach(([c,m])=>g[c]=(g[c]||0)+m);
+  $('#grpT').innerHTML='<tr><th>Concepto</th><th>Suma</th></tr>'+Object.entries(g).map(([c,m])=>`<tr class="row-anim"><td>${c}</td><td><b>$${m.toLocaleString()}</b></td></tr>`).join('');
+};
+$('#rstBtn').onclick=()=>{drawRaw();$('#grpT').innerHTML='<tr><td class="note">Presiona "Agrupar y sumar"</td></tr>'};
+
+/* preguntas */
+const qs=[
+ ['¿Qué tipo de analítica realizaron?','Principalmente <b>analítica descriptiva</b>: resumimos qué ha pasado con los pagos (cuánto se cobró, cuánto está pendiente y por qué concepto).'],
+ ['¿Por qué eligieron la tabla PAGOS?','Porque ahí están los <b>montos, conceptos y estados de pago</b>, que son justo la información que necesitamos para responder la pregunta sobre ingresos.'],
+ ['¿Por qué no analizaron todas las columnas?','Porque solo se necesitan las relevantes para la pregunta: concepto, estado y monto. Usar columnas de más agrega ruido sin aportar a la respuesta.'],
+ ['¿Qué hace groupby()?','<b>Agrupa los registros que tienen algo en común</b> (por ejemplo, el mismo concepto de pago) para después aplicar una operación como sum().'],
+ ['¿Qué diferencia hay entre un pago pendiente y uno cancelado?','<b>Pendiente:</b> aún se espera cobrar ese dinero. <b>Cancelado:</b> ya no se cobrará y no cuenta como dinero cobrado.'],
+ ['¿Cuál fue el hallazgo más importante?','Que los <b>planes anual y semestral</b> aportan la mayor parte del dinero cobrado y también concentran la mayor parte de los <b>$23,800 pendientes</b>.'],
+ ['¿El plan anual es el más vendido?','<b>No necesariamente.</b> Nuestro análisis mide <b>dinero</b>, no cantidad de ventas. Un plan caro puede generar más ingresos aunque se venda menos. Para saber el más vendido habría que contar registros.'],
+ ['¿Los $583,400 son ganancias del gimnasio?','<b>No, son ingresos.</b> Las ganancias se calculan restando los gastos (nómina, renta, servicios, etc.), que no están en este análisis.'],
+ ['¿Qué mejora recomendarían al gimnasio?','Dar <b>seguimiento a los $23,800 pendientes</b> (recordatorios, facilidades de pago), sobre todo en planes anuales y semestrales, y fomentar esos planes por su aporte a los ingresos.'],
+ ['¿Qué limitación tiene su análisis?','Solo vimos <b>ingresos y estados de pago</b>: no incluye gastos, ni comparaciones en el tiempo, ni cuántos clientes hay por plan. Es una fotografía de los datos registrados.']
+];
+$('#qa').innerHTML=qs.map((q,i)=>`<div class="acc"><button><span>${i+1}. ${q[0]}</span><em>＋</em></button><div class="ans">${q[1]}</div></div>`).join('');
+$$('.acc button').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'));
+
+/* quiz */
+const quiz=[
+ {q:'Los $583,400 representan…',o:['Ganancias del gimnasio','Ingresos por pagos realizados','Dinero pendiente'],c:1},
+ {q:'¿Qué hace sum() después de groupby()?',o:['Elimina duplicados','Suma las cantidades de cada grupo','Crea la gráfica'],c:1},
+ {q:'¿Qué indica shape = (300, 9)?',o:['300 columnas y 9 filas','300 filas y 9 columnas','300 tablas'],c:1},
+ {q:'Un pago cancelado…',o:['Se cobrará después','No cuenta como dinero cobrado','Es un valor atípico'],c:1}
+];
+let qi=0,score=0;
+function showQ(){
+  const box=$('#quiz');
+  if(qi>=quiz.length){box.innerHTML=`<p><b>Resultado: ${score}/${quiz.length}</b> ${score===quiz.length?'🎉 ¡Excelente!':'Repasa las secciones y vuelve a intentar.'}</p><button class="btn" id="qr">Reintentar</button>`;
+    $('#qr').onclick=()=>{qi=0;score=0;showQ()};return}
+  const x=quiz[qi];
+  box.innerHTML=`<p><b>${qi+1}/${quiz.length} · ${x.q}</b></p>`+x.o.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('');
+  $$('.opt').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i;$$('.opt').forEach(z=>z.disabled=true);
+    $$('.opt')[x.c].classList.add('good');
+    if(i===x.c)score++;else b.classList.add('bad');
+    setTimeout(()=>{qi++;showQ()},1200);
+  });
+}
+showQ();
+
+/* conceptos */
+const cons=[
+ ['Base de datos','Conjunto organizado de información almacenada para consultarla y usarla.'],
+ ['Modelo relacional','Forma de organizar datos en tablas conectadas entre sí mediante identificadores.'],
+ ['Clave primaria','Identificador único de cada registro (ej. número de cliente).'],
+ ['Clave foránea','Campo que conecta una tabla con otra usando el identificador.'],
+ ['Pandas','Biblioteca de Python para leer, organizar y calcular datos.'],
+ ['Matplotlib','Biblioteca de Python para crear gráficas.'],
+ ['Datos ausentes','Espacios donde falta información en la tabla.'],
+ ['Valores atípicos','Cantidades muy alejadas del resto que conviene revisar.'],
+ ['groupby()','Agrupa los registros que comparten algo en común.'],
+ ['sum()','Suma las cantidades de cada grupo.'],
+ ['head(10)','Muestra los primeros diez registros de una tabla.'],
+ ['shape','Indica cuántas filas y columnas tiene una tabla.']
+];
+$('#flips').innerHTML=cons.map(c=>`<div class="flip"><div><div class="f"><span>${c[0]}<small>Ver significado</small></span></div><div class="b">${c[1]}</div></div></div>`).join('');
+$$('.flip').forEach(f=>f.onclick=()=>f.classList.toggle('on'));
+let all=false;
+$('#showAll').onclick=()=>{all=!all;$$('.flip').forEach(f=>f.classList.toggle('on',all))};
+
+/* checklist */
+const items=['Puedo explicar la pregunta analítica con mis palabras','Sé qué es una PK, una FK y una relación 1:N','Puedo explicar qué es limpiar datos y por qué importa','Entiendo qué hace groupby() y sum()','Puedo explicar las tres gráficas','Sé la diferencia entre ingresos y ganancias','Sé la diferencia entre pago pendiente y cancelado','Puedo decir una limitación y una recomendación'];
+$('#check').innerHTML=items.map((t,i)=>`<label><input type="checkbox" data-k="${i}"><span>${t}</span></label>`).join('');
+function updCheck(){
+  const n=$$('#check input:checked').length;
+  $('#checkMsg').textContent=`${n} de ${items.length} listos`+(n===items.length?' — ¡Estás listo para exponer! 🚀':'');
+}
+$$('#check input').forEach(i=>i.onchange=updCheck);updCheck();
+</script>
+</body>
+</html>
